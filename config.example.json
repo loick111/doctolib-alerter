@@ -1,0 +1,12 @@
+{
+    "notify": "user@example.com,user2@example.com",
+    "template": "mail.ejs",
+    "centersFile": "centers.json",
+    "smtp": {
+        "host": "example.com",
+        "port": 465,
+        "secure": true,
+        "mail": "user@example.com",
+        "password": "xxxx"
+    }
+}

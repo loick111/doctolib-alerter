@@ -1,0 +1,10 @@
+<p>Le centre de vaccination '<%= center.name %>' est disponible.</p>
+<p>Il est possible de réserver directement sur <a href="<%= center.link %>">Doctolib</a> </p>
+
+<ul>
+    <% availabilities.forEach((availability) => { %>
+    <% availability.slots.forEach((slot) => { %>
+    <li><%= moment(slot.start_date).format("DD/MM/YYYY HH:mm") %> - <%= moment(slot.end_date).format("DD/MM/YYYY HH:mm") %></li>
+    <% }) %>
+    <% }) %>
+</ul>

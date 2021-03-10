@@ -1,0 +1,19 @@
+{
+  "name": "doctolib",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "start": "node --no-warnings --experimental-json-modules main.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "loick111",
+  "license": "MIT",
+  "dependencies": {
+    "ejs": "^3.1.6",
+    "moment": "^2.29.1",
+    "node-fetch": "^2.6.1",
+    "nodemailer": "^6.5.0",
+    "yargs": "^16.2.0"
+  }
+}
