@@ -22,26 +22,29 @@ let transporter = nodemailer.createTransport({
 const send = (center, availabilities) => {
   log.info(center, "Sending notification...");
 
-  fs.readFile(config.template, "utf8", (err, data) => {
-    if (err) {
-      return log.error("Notification error: " + err);
-    }
+  return new Promise((resolve, reject) => {
+    fs.readFile(config.template, "utf8", (err, data) => {
+      if (err) {
+        reject(err);
+      }
 
-    let content = ejs.render(data, {
-      center: center,
-      availabilities: availabilities,
-      moment: moment,
+      let content = ejs.render(data, {
+        center: center,
+        availabilities: availabilities,
+        moment: moment,
+      });
+
+      transporter
+        .sendMail({
+          from: '"Doctolib alerter" <' + config.smtp.mail + ">",
+          bcc: config.notify,
+          subject: center.name + " disponible !",
+          html: content,
+        })
+        .then(() => log.info(center, "Notification sent!"))
+        .then(resolve)
+        .catch(reject);
     });
-
-    transporter
-      .sendMail({
-        from: '"Doctolib alerter" <' + config.smtp.mail + ">",
-        bcc: config.notify,
-        subject: center.name + " disponible !",
-        html: content,
-      })
-      .then(() => log.info(center, "Notification sent!"))
-      .catch((err) => log.error(center, err));
   });
 };
 

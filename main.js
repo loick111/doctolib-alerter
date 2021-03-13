@@ -13,7 +13,7 @@ const params = yargs(process.argv.slice(2))
       interval: {
         alias: "i",
         description: "Interval between two checks (in seconds)",
-        required: true,
+        default: -1,
       },
     },
     (argv) => check.run(argv.interval)

@@ -6,40 +6,54 @@ import log from "../utils/log.js";
 import notification from "../utils/notification.js";
 import doctolib from "../api/doctolib.js";
 
-const checkAvailabilities = (center) => {
-  const baseParams = {
-    start_date: moment().format("YYYY-MM-DD"),
-    insurance_sector: "public",
-    destroy_temporary: true,
-    allowNewPatients: true,
-    telehealth: false,
-    isOrganization: true,
-    telehealthFeatureEnabled: false,
-    vaccinationMotive: true,
-    vaccinationDaysRange: 25,
-    vaccinationCenter: true,
-    limit: 30,
-  };
+// object to save "already notified" flags
+var notifiedFlags = {};
 
-  return doctolib.Availabilities.getAll({
-    ...baseParams,
-    ...center.params,
-  }).then((data) => {
-    let availabilities = data.availabilities.filter((a) => a.slots.length > 0);
+const checkAvailabilities = (centers, interval) => {
+  return Promise.all(
+    centers.map((center) =>
+      doctolib.Availabilities.getAll({
+        start_date: moment().format("YYYY-MM-DD"),
+        insurance_sector: "public",
+        destroy_temporary: true,
+        allowNewPatients: true,
+        telehealth: false,
+        isOrganization: true,
+        telehealthFeatureEnabled: false,
+        vaccinationMotive: true,
+        vaccinationDaysRange: 25,
+        vaccinationCenter: true,
+        limit: 30,
+        ...center.params,
+      })
+    )
+  )
+    .then((data) => {
+      data.map((av, i) => {
+        const center = centers[i];
 
-    if (availabilities.length > 0) {
-      log.info(center, "Availability found!");
-      notification.send(center, data.availabilities);
-    } else {
-      log.info(center, "No availability");
-    }
-  });
-};
+        const availabilities = av.availabilities.filter(
+          (a) => a.slots.length > 0
+        );
 
-const check = (centers, interval) => {
-  return Promise.all(centers.map((center) => checkAvailabilities(center)))
-    .then(() => log.log("INFO", "Sleep for " + interval + " seconds..."))
-    .catch((err) => log.error(center, err));
+        if (availabilities.length > 0) {
+          log.info(center, "Availability found!");
+
+          // skip notification if already notified
+          if (notifiedFlags[center.id] == true) {
+            return;
+          }
+
+          notification
+            .send(center, av.availabilities)
+            .then(() => (notifiedFlags[center.id] = true)); // set flag to notified
+        } else {
+          log.info(center, "No availability");
+          notifiedFlags[center.id] = false; // remove flag
+        }
+      });
+    })
+    .catch(console.error);
 };
 
 const run = (interval) => {
@@ -48,12 +62,19 @@ const run = (interval) => {
       return log.error("Loading error: " + err);
     }
 
-    let centers = JSON.parse(data);
+    const centers = JSON.parse(data);
 
-    check(centers, interval);
-    setInterval(() => {
-      check(centers, interval);
-    }, interval * 1000);
+    checkAvailabilities(centers, interval);
+
+    // check loop if interval is provided
+    if (interval >= 0) {
+      log.log("INFO", "Sleep for " + interval + " seconds...");
+
+      setInterval(() => {
+        checkAvailabilities(centers, interval);
+        log.log("INFO", "Sleep for " + interval + " seconds...");
+      }, interval * 1000);
+    }
   });
 };
 
