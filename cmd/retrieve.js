@@ -15,7 +15,7 @@ const run = (postalPattern) => {
           f.properties.c_com_cp?.match(new RegExp(postalPattern, 'g'))
         ) // filter by postal code
         .filter((f) => !f.properties.c_nom.match(/réservé/i)) // remove professional only
-        .filter((f) => f.properties.c_rdv_site_web?.match(/doctolib/g)) // only doctolib
+        .filter((f) => f.properties.c_rdv_site_web?.match(/doctolib.fr/g)) // only doctolib
         .map((center) => {
           const url = new URL(center.properties.c_rdv_site_web);
           const id = url.pathname.split('/').pop();
