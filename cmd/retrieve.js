@@ -80,36 +80,42 @@ const run = (postalPattern) => {
             });
 
           // generate output
-          let output = bookable.map((b) => {
-            let agendas = b.agendas;
+          let output = bookable
+            .map((b) => {
+              let agendas = b.agendas;
 
-            // filter by practice id (if exists in center data)
-            if (b.center.practiceId) {
-              agendas = agendas.filter(
-                (a) => a.practice_id == b.center.practiceId
-              );
-            }
+              // filter by practice id (if exists in center data)
+              if (b.center.practiceId) {
+                agendas = agendas.filter(
+                  (a) => a.practice_id == b.center.practiceId
+                );
+              }
 
-            const agenda_ids = agendas.map((a) => a.id).join('-');
-            const practice_ids = agendas
-              .map((a) => a.practice_id)
-              .filter((v, i, a) => a.indexOf(v) === i)
-              .join('-');
+              const agenda_ids = agendas.map((a) => a.id).join('-');
+              const practice_ids = agendas
+                .map((a) => a.practice_id)
+                .filter((v, i, a) => a.indexOf(v) === i)
+                .join('-');
 
-            return {
-              id: b.center.id,
-              name: b.center.name,
-              city: b.center.city,
-              cp: b.center.cp,
-              link: b.center.link,
-              params: {
-                visit_motive_ids: b.visitMotive.id,
-                agenda_ids: agenda_ids,
-                practice_ids: practice_ids,
-                profileId: b.center.booking.data.profile.id,
-              },
-            };
-          });
+              return {
+                id: b.center.id,
+                name: b.center.name,
+                city: b.center.city,
+                cp: b.center.cp,
+                link: b.center.link,
+                params: {
+                  visit_motive_ids: b.visitMotive.id,
+                  agenda_ids: agenda_ids,
+                  practice_ids: practice_ids,
+                  profileId: b.center.booking.data.profile.id,
+                },
+              };
+            })
+            .filter(
+              (center) =>
+                center.params.agenda_ids.length > 0 &&
+                center.params.practice_ids.length > 0
+            );
 
           // export centers to file
           let outputJSON = JSON.stringify(output, null, 2);
