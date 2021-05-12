@@ -1,9 +1,9 @@
-import fs from "fs";
+import fs from 'fs';
 
-import config from "../config.json";
-import gouv from "../api/gouv.js";
-import doctolib from "../api/doctolib.js";
-import { URL } from "url";
+import config from '../config.json';
+import gouv from '../api/gouv.js';
+import doctolib from '../api/doctolib.js';
+import { URL } from 'url';
 
 const run = (postalPattern) => {
   gouv
@@ -12,18 +12,18 @@ const run = (postalPattern) => {
       // create centers objects
       let centers = data.features
         .filter((f) =>
-          f.properties.c_com_cp?.match(new RegExp(postalPattern, "g"))
+          f.properties.c_com_cp?.match(new RegExp(postalPattern, 'g'))
         ) // filter by postal code
         .filter((f) => !f.properties.c_nom.match(/réservé/i)) // remove professional only
         .filter((f) => f.properties.c_rdv_site_web?.match(/doctolib/g)) // only doctolib
         .map((center) => {
           const url = new URL(center.properties.c_rdv_site_web);
-          const id = url.pathname.split("/").pop();
+          const id = url.pathname.split('/').pop();
           const practiceId = url.searchParams
-            .get("pid")
-            ?.replace("practice-", "")
-            .replace(/\?.*/g, ""); // fix to remove bad formatted params
-          const specialityId = url.searchParams.get("speciality_id");
+            .get('pid')
+            ?.replace('practice-', '')
+            .replace(/\?.*/g, ''); // fix to remove bad formatted params
+          const specialityId = url.searchParams.get('speciality_id');
 
           return {
             id: id,
@@ -44,7 +44,7 @@ const run = (postalPattern) => {
             booking: booking,
           }));
 
-          let regExpFirstInjection = /^1ère injection/g;
+          let regExpFirstInjection = /^1re injection/g;
 
           // filter only wanted centers
           let bookable = fullCenters
@@ -59,7 +59,7 @@ const run = (postalPattern) => {
                 center.booking.data.visit_motives.filter(
                   (vm) =>
                     vm.name.match(regExpFirstInjection) != null &&
-                    vm.allow_new_patients_on_insurance_sector != "private" // remove professional only
+                    vm.allow_new_patients_on_insurance_sector != 'private' // remove professional only
                 ).length > 0
             )
             .map((center) => {
@@ -90,11 +90,11 @@ const run = (postalPattern) => {
               );
             }
 
-            const agenda_ids = agendas.map((a) => a.id).join("-");
+            const agenda_ids = agendas.map((a) => a.id).join('-');
             const practice_ids = agendas
               .map((a) => a.practice_id)
               .filter((v, i, a) => a.indexOf(v) === i)
-              .join("-");
+              .join('-');
 
             return {
               id: b.center.id,

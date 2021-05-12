@@ -1,20 +1,20 @@
-import moment from "moment";
-import fs from "fs";
+import moment from 'moment';
+import fs from 'fs';
 
-import config from "../config.json";
-import log from "../utils/log.js";
-import notification from "../utils/notification.js";
-import doctolib from "../api/doctolib.js";
+import config from '../config.json';
+import log from '../utils/log.js';
+import notification from '../utils/notification.js';
+import doctolib from '../api/doctolib.js';
 
 // object to save "already notified" flags
 var notifiedFlags = {};
 
-const checkAvailabilities = (centers, interval) => {
+const checkAvailabilities = (centers, daysFromToday, forceNotify) => {
   return Promise.all(
     centers.map((center) =>
       doctolib.Availabilities.getAll({
-        start_date: moment().format("YYYY-MM-DD"),
-        insurance_sector: "public",
+        start_date: moment().format('YYYY-MM-DD'),
+        insurance_sector: 'public',
         destroy_temporary: true,
         allowNewPatients: true,
         telehealth: false,
@@ -32,15 +32,23 @@ const checkAvailabilities = (centers, interval) => {
       data.map((av, i) => {
         const center = centers[i];
 
-        const availabilities = av.availabilities.filter(
-          (a) => a.slots.length > 0
-        );
+        const availabilities = av.availabilities
+          .filter((a) => {
+            if (daysFromToday == -1) {
+              return true;
+            }
+
+            const duration = moment.duration(moment(a.date).diff(moment()));
+            return duration.asDays() <= daysFromToday;
+          })
+          .filter((a) => a.slots.length > 0);
 
         if (availabilities.length > 0) {
-          log.info(center, "Availability found!");
+          log.info(center, 'Availability found!');
 
           // skip notification if already notified
-          if (notifiedFlags[center.id] == true) {
+          // continue if forced
+          if (notifiedFlags[center.id] == true && forceNotify == false) {
             return;
           }
 
@@ -48,7 +56,7 @@ const checkAvailabilities = (centers, interval) => {
             .send(center, av.availabilities)
             .then(() => (notifiedFlags[center.id] = true)); // set flag to notified
         } else {
-          log.info(center, "No availability");
+          log.info(center, 'No availability');
           notifiedFlags[center.id] = false; // remove flag
         }
       });
@@ -56,23 +64,23 @@ const checkAvailabilities = (centers, interval) => {
     .catch(console.error);
 };
 
-const run = (interval) => {
-  fs.readFile(config.centersFile, "utf8", (err, data) => {
+const run = (interval, daysFromToday, forceNotify) => {
+  fs.readFile(config.centersFile, 'utf8', (err, data) => {
     if (err) {
-      return log.error("Loading error: " + err);
+      return log.error('Loading error: ' + err);
     }
 
     const centers = JSON.parse(data);
 
-    checkAvailabilities(centers, interval);
+    checkAvailabilities(centers, daysFromToday, forceNotify);
 
     // check loop if interval is provided
     if (interval >= 0) {
-      log.log("INFO", "Sleep for " + interval + " seconds...");
+      log.log('INFO', 'Sleep for ' + interval + ' seconds...');
 
       setInterval(() => {
-        checkAvailabilities(centers, interval);
-        log.log("INFO", "Sleep for " + interval + " seconds...");
+        checkAvailabilities(centers, daysFromToday, forceNotify);
+        log.log('INFO', 'Sleep for ' + interval + ' seconds...');
       }, interval * 1000);
     }
   });
