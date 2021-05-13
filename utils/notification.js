@@ -1,10 +1,10 @@
-import nodemailer from "nodemailer";
-import moment from "moment";
-import ejs from "ejs";
-import fs from "fs";
+import nodemailer from 'nodemailer';
+import moment from 'moment';
+import ejs from 'ejs';
+import fs from 'fs';
 
-import config from "../config.json";
-import log from "./log.js";
+import config from '../config.json';
+import log from './log.js';
 
 let transporter = nodemailer.createTransport({
   host: config.smtp.host,
@@ -20,10 +20,10 @@ let transporter = nodemailer.createTransport({
 });
 
 const send = (center, availabilities) => {
-  log.info(center, "Sending notification...");
+  log.info(center, 'Sending notification...');
 
   return new Promise((resolve, reject) => {
-    fs.readFile(config.template, "utf8", (err, data) => {
+    fs.readFile(config.template, 'utf8', (err, data) => {
       if (err) {
         reject(err);
       }
@@ -36,12 +36,12 @@ const send = (center, availabilities) => {
 
       transporter
         .sendMail({
-          from: '"Doctolib alerter" <' + config.smtp.mail + ">",
+          from: '"Doctolib alerter" <' + config.smtp.mail + '>',
           bcc: config.notify,
-          subject: center.name + " disponible !",
+          subject: center.name + ' disponible !',
           html: content,
         })
-        .then(() => log.info(center, "Notification sent!"))
+        .then(() => log.info(center, 'Notification sent!'))
         .then(resolve)
         .catch(reject);
     });

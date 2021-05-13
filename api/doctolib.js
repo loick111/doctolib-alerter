@@ -1,19 +1,19 @@
-import fetch from "node-fetch";
+import fetch from 'node-fetch';
 
-import utils from "../utils/api.js";
+import utils from '../utils/api.js';
 
 const Availabilities = {
   getAll: (params) => {
     let url =
-      "https://partners.doctolib.fr/availabilities.json" +
+      'https://partners.doctolib.fr/availabilities.json' +
       utils.generateParams(params);
 
     return fetch(url, {
       headers: {
-        accept: "application/json",
-        "content-type": "application/json; charset=utf-8",
+        accept: 'application/json',
+        'content-type': 'application/json; charset=utf-8',
       },
-      method: "GET",
+      method: 'GET',
     })
       .then(utils.checkStatus)
       .then((res) => res.json());
@@ -22,14 +22,14 @@ const Availabilities = {
 
 const Booking = {
   get: (id) => {
-    let url = "https://partners.doctolib.fr/booking/" + id + ".json";
+    let url = 'https://partners.doctolib.fr/booking/' + id + '.json';
 
     return fetch(url, {
       headers: {
-        accept: "application/json",
-        "content-type": "application/json; charset=utf-8",
+        accept: 'application/json',
+        'content-type': 'application/json; charset=utf-8',
       },
-      method: "GET",
+      method: 'GET',
     })
       .then(utils.checkStatus)
       .then((res) => res.json());

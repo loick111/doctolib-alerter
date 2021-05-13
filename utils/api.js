@@ -7,10 +7,10 @@ const checkStatus = (res) => {
 };
 
 const generateParams = (params) => {
-  let url = "";
+  let url = '';
 
   if (Object.keys(params).length > 0) {
-    url = "?" + new URLSearchParams(params);
+    url = '?' + new URLSearchParams(params);
   }
 
   return url;
