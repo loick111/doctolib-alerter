@@ -18,7 +18,7 @@ const checkAvailabilities = (
   return Promise.all(
     centers.map((center) =>
       doctolib.Availabilities.getAll({
-        start_date: moment().format('YYYY-MM-DD'),
+        start_date: moment(startDate).format('YYYY-MM-DD'),
         insurance_sector: 'public',
         destroy_temporary: true,
         allowNewPatients: true,
@@ -43,14 +43,15 @@ const checkAvailabilities = (
               return true;
             }
 
-            if (startDate != -1) {
-              startDate = moment(startDate);
-            } else {
-              startDate = moment(); // default to now if not provided
+            const duration = moment.duration(
+              moment(a.date).diff(moment(startDate))
+            );
+
+            if (duration.asDays() > -1 && duration.asDays() <= daysFromToday) {
+              return true;
             }
 
-            const duration = moment.duration(moment(a.date).diff(startDate));
-            return -1 < duration.asDays() <= daysFromToday;
+            return false;
           })
           .filter((a) => a.slots.length > 0);
 
@@ -64,7 +65,7 @@ const checkAvailabilities = (
           }
 
           notification
-            .send(center, av.availabilities)
+            .send(center, availabilities)
             .then(() => (notifiedFlags[center.id] = true)); // set flag to notified
         } else {
           log.info(center, 'No availability');

@@ -4,7 +4,7 @@
 <ul>
     <% availabilities.forEach((availability) => { %>
     <% availability.slots.forEach((slot) => { %>
-    <li><%= moment(slot.start_date).format("DD/MM/YYYY HH:mm") %> - <%= moment(slot.end_date).format("DD/MM/YYYY HH:mm") %></li>
+    <li><%= moment(slot).format("DD/MM/YYYY HH:mm") %></li>
     <% }) %>
     <% }) %>
 </ul>

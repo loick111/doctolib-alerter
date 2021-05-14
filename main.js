@@ -1,4 +1,3 @@
-import moment from 'moment';
 import yargs from 'yargs';
 import check from './cmd/check.js';
 import retrieve from './cmd/retrieve.js';
@@ -18,8 +17,8 @@ const params = yargs(process.argv.slice(2))
       },
       startDate: {
         alias: 's',
-        description: 'Check availabilities after provided date',
-        default: -1,
+        description: 'Check availabilities after provided date (now if empty)',
+        default: undefined,
       },
       daysFromToday: {
         alias: 'd',
