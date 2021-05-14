@@ -9,7 +9,12 @@ import doctolib from '../api/doctolib.js';
 // object to save "already notified" flags
 var notifiedFlags = {};
 
-const checkAvailabilities = (centers, daysFromToday, forceNotify) => {
+const checkAvailabilities = (
+  centers,
+  startDate,
+  daysFromToday,
+  forceNotify
+) => {
   return Promise.all(
     centers.map((center) =>
       doctolib.Availabilities.getAll({
@@ -38,8 +43,14 @@ const checkAvailabilities = (centers, daysFromToday, forceNotify) => {
               return true;
             }
 
-            const duration = moment.duration(moment(a.date).diff(moment()));
-            return duration.asDays() <= daysFromToday;
+            if (startDate != -1) {
+              startDate = moment(startDate);
+            } else {
+              startDate = moment(); // default to now if not provided
+            }
+
+            const duration = moment.duration(moment(a.date).diff(startDate));
+            return -1 < duration.asDays() <= daysFromToday;
           })
           .filter((a) => a.slots.length > 0);
 
@@ -64,7 +75,7 @@ const checkAvailabilities = (centers, daysFromToday, forceNotify) => {
     .catch(console.error);
 };
 
-const run = (interval, daysFromToday, forceNotify) => {
+const run = (interval, startDate, daysFromToday, forceNotify) => {
   fs.readFile(config.centersFile, 'utf8', (err, data) => {
     if (err) {
       return log.error('Loading error: ' + err);
@@ -72,14 +83,14 @@ const run = (interval, daysFromToday, forceNotify) => {
 
     const centers = JSON.parse(data);
 
-    checkAvailabilities(centers, daysFromToday, forceNotify);
+    checkAvailabilities(centers, startDate, daysFromToday, forceNotify);
 
     // check loop if interval is provided
     if (interval >= 0) {
       log.log('INFO', 'Sleep for ' + interval + ' seconds...');
 
       setInterval(() => {
-        checkAvailabilities(centers, daysFromToday, forceNotify);
+        checkAvailabilities(centers, startDate, daysFromToday, forceNotify);
         log.log('INFO', 'Sleep for ' + interval + ' seconds...');
       }, interval * 1000);
     }

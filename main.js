@@ -1,3 +1,4 @@
+import moment from 'moment';
 import yargs from 'yargs';
 import check from './cmd/check.js';
 import retrieve from './cmd/retrieve.js';
@@ -15,6 +16,11 @@ const params = yargs(process.argv.slice(2))
         description: 'Interval between two checks (in seconds)',
         default: -1,
       },
+      startDate: {
+        alias: 's',
+        description: 'Check availabilities after provided date',
+        default: -1,
+      },
       daysFromToday: {
         alias: 'd',
         description: 'Numbers of days to wait for availabilities',
@@ -28,7 +34,12 @@ const params = yargs(process.argv.slice(2))
       },
     },
     (argv) =>
-      check.run(argv.interval, argv.daysFromToday, argv.forceNotify != false)
+      check.run(
+        argv.interval,
+        argv.startDate,
+        argv.daysFromToday,
+        argv.forceNotify != false
+      )
   )
 
   .command(

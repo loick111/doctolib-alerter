@@ -44,7 +44,7 @@ const run = (postalPattern) => {
             booking: booking,
           }));
 
-          let regExpFirstInjection = /^1re injection/g;
+          let regExpFirstInjection = /^2de injection/g;
 
           // filter only wanted centers
           let bookable = fullCenters
