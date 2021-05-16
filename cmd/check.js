@@ -1,7 +1,6 @@
 import moment from 'moment';
 import fs from 'fs';
 
-import config from '../config.json';
 import log from '../utils/log.js';
 import notification from '../utils/notification.js';
 import doctolib from '../api/doctolib.js';
@@ -77,24 +76,31 @@ const checkAvailabilities = (
 };
 
 const run = (interval, startDate, daysFromToday, forceNotify) => {
-  fs.readFile(config.centersFile, 'utf8', (err, data) => {
+  fs.readFile('config.json', 'utf8', (err, config) => {
     if (err) {
-      return log.error('Loading error: ' + err);
+      return log.error('Error loading config.json file: ' + err);
     }
+    config = JSON.parse(config);
 
-    const centers = JSON.parse(data);
+    fs.readFile(config.centersFile, 'utf8', (err, data) => {
+      if (err) {
+        return log.error('Loading error: ' + err);
+      }
 
-    checkAvailabilities(centers, startDate, daysFromToday, forceNotify);
+      const centers = JSON.parse(data);
 
-    // check loop if interval is provided
-    if (interval >= 0) {
-      log.log('INFO', 'Sleep for ' + interval + ' seconds...');
+      checkAvailabilities(centers, startDate, daysFromToday, forceNotify);
 
-      setInterval(() => {
-        checkAvailabilities(centers, startDate, daysFromToday, forceNotify);
+      // check loop if interval is provided
+      if (interval >= 0) {
         log.log('INFO', 'Sleep for ' + interval + ' seconds...');
-      }, interval * 1000);
-    }
+
+        setInterval(() => {
+          checkAvailabilities(centers, startDate, daysFromToday, forceNotify);
+          log.log('INFO', 'Sleep for ' + interval + ' seconds...');
+        }, interval * 1000);
+      }
+    });
   });
 };
 

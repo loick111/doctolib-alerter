@@ -7,6 +7,7 @@
     "start": "node --no-warnings --experimental-json-modules main.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "bin": "./doctolib.js",
   "author": "loick111",
   "license": "MIT",
   "dependencies": {

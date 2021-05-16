@@ -1,6 +1,5 @@
 import fs from 'fs';
 
-import config from '../config.json';
 import gouv from '../api/gouv.js';
 import doctolib from '../api/doctolib.js';
 import { URL } from 'url';
@@ -120,10 +119,18 @@ const run = (postalPattern) => {
           // export centers to file
           let outputJSON = JSON.stringify(output, null, 2);
           console.log(outputJSON);
-          fs.writeFile(config.centersFile, outputJSON, (err) => {
+
+          fs.readFile('config.json', 'utf8', (err, config) => {
             if (err) {
-              console.error(err);
+              return log.error('Error loading config.json file: ' + err);
             }
+            config = JSON.parse(config);
+
+            fs.writeFile(config.centersFile, outputJSON, (err) => {
+              if (err) {
+                console.error(err);
+              }
+            });
           });
         })
         .catch(console.error);
